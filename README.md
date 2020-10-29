@@ -1,2 +1,2 @@
-# MScProposal
-Simulated data from my MSc proposal
+# PhDProposal
+Simulated data from my PhD proposal

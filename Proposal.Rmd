@@ -227,7 +227,7 @@ biplot1
 
 
 ```{r}
-ggsave('fig.1.jpeg',biplot1, units = 'cm', width = 15, height = 11)
+#ggsave('figures/fig.1.jpeg',biplot1, units = 'cm', width = 15, height = 11)
 ```
 
 
@@ -297,8 +297,8 @@ head(env)
 ```
 
 ```{r}
-#write.csv(structure, "structure.csv")
-#write.csv(env, "environment.csv")
+#write.csv(structure, "outputs/structure.csv")
+#write.csv(env, "outputs/environment.csv")
 ```
 
 ```{r}
@@ -357,13 +357,6 @@ summary(model.1)
 
 
 
-
-
-
-
-
-
-
 #RDA
 
 ```{r}
@@ -384,7 +377,7 @@ landscape$D.patches <- structure.H$n.patches - structure.M$n.patches
 landscape$D.C <- structure.H$C - structure.M$C
 landscape$D.FAS <- structure.H$FAS - structure.M$FAS
 landscape$D.FSS <- structure.H$FSS - structure.M$FSS
-landscapeD.edge <- structure.H$f.edge - structure.M$f.edge
+landscape$D.edge <- structure.H$f.edge - structure.M$f.edge
 landscape$D.cover <- structure.H$p.cover - structure.M$p.cover
 landscape$D.density <- structure.H$t.density - structure.M$t.density
 
@@ -502,6 +495,6 @@ fig.2
 ```
 
 ```{r}
-#ggsave('fig.2.jpeg',fig.2, units = 'cm', width = 17, height = 13)
+#ggsave('figures/fig.2.jpeg',fig.2, units = 'cm', width = 17, height = 13)
 ```
 
