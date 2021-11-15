@@ -1,0 +1,70 @@
+---
+title: "Landscape change"
+author: "Jen Baron | University of British Columbia, Department of Forest and Conservation Sciences  jenbaron@mail.ubc.ca"
+date: "November 11, 2021"
+output:
+  html_document:
+    theme: flatly
+    toc: yes
+    toc_float: yes
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+ 
+
+```{r}
+source(here("rel.R")) # relativize by row sum
+source(here("fix_tm.R")) # for annual time steps
+```
+
+```{r}
+rmt.data <- read.csv("data/Transition_data.csv")
+str(rmt.data)
+```
+
+```{r}
+sample.n <- dim(rmt.data)[[1]] # number of rows in the dataset
+
+#1950
+t1950 <- table(as.factor(rmt.data$X1950)) # tally in each cover class
+t1950
+p1950 <- t1950/sample.n # proportion in each cover class
+
+#2016
+t2016 <- table(as.factor(rmt.data$X2016)) # tally in each cover class
+p2016 <- t2016/sample.n  # proportion in each cover class
+
+inits <- as.vector(p1950) #initial time step
+years <- c(1950, 2016)
+
+rmt.d2 <- rbind(as.vector(p1950), as.vector(p2016)) #combine initial conditions
+rmt.d2 <- data.frame(cbind(years, rmt.d2)) #attach years
+
+names(rmt.d2) <- c("Year","Agriculture","Closed forest","Dense forest","Open forest","Urban", "Woodland") #fix names
+
+rmt.d2
+```
+
+
+Prepare the data to plot
+
+```{r}
+rmt.d2_long <- rmt.d2 %>% 
+  pivot_longer(cols=starts_with("V"), 
+               names_to="Class", 
+               values_to="Proportion") #convert to "long" format to plot
+head(rmt.d2_long)
+```
+
+Visualize the data
+
+```{r}
+ggplot(rmt.d2_long, aes(x=years, y=Proportion, col = Class)) +
+  geom_line() +
+  geom_point() +
+  theme_classic()
+```
