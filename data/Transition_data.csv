@@ -1,64 +1,9 @@
 ID,1950,2016
-1,Grassland,Grassland
-2,Grassland,Grassland
-3,Grassland,Grassland
-4,Grassland,Grassland
-5,Grassland,Grassland
-6,Grassland,Agriculture
-7,Grassland,Urban
-8,Grassland,Urban
-9,Grassland,Woodland
-10,Grassland,Woodland
-11,Grassland,Woodland
-12,Grassland,Open forest
-13,Grassland,Open forest
-14,Grassland,Open forest
-15,Grassland,Open forest
-16,Grassland,Open forest
-17,Grassland,Open forest
-18,Grassland,Open forest
-19,Grassland,Open forest
-20,Grassland,Closed forest
-21,Woodland,Woodland
-22,Woodland,Woodland
-23,Woodland,Woodland
-24,Woodland,Woodland
-25,Woodland,Woodland
-26,Woodland,Woodland
-27,Woodland,Agriculture
-28,Woodland,Urban
-29,Woodland,Open forest
-30,Woodland,Open forest
-31,Woodland,Open forest
-32,Woodland,Open forest
-33,Woodland,Closed forest
-34,Woodland,Closed forest
-35,Woodland,Closed forest
-36,Woodland,Closed forest
-37,Woodland,Closed forest
-38,Woodland,Dense forest
-39,Woodland,Dense forest
-40,Woodland,Dense forest
-41,Open forest,Open forest
-42,Open forest,Open forest
-43,Open forest,Open forest
-44,Open forest,Open forest
-45,Open forest,Open forest
-46,Open forest,Open forest
-47,Open forest,Closed forest
-48,Open forest,Closed forest
-49,Open forest,Closed forest
-50,Open forest,Closed forest
-51,Open forest,Closed forest
-52,Open forest,Closed forest
-53,Open forest,Dense forest
-54,Open forest,Dense forest
-55,Open forest,Dense forest
-56,Open forest,Dense forest
-57,Open forest,Dense forest
-58,Open forest,Dense forest
-59,Open forest,Dense forest
-60,Open forest,Grassland
+93,Agriculture,Grassland
+95,Agriculture,Woodland
+96,Agriculture,Agriculture
+97,Agriculture,Woodland
+98,Agriculture,Woodland
 61,Closed forest,Closed forest
 62,Closed forest,Closed forest
 63,Closed forest,Closed forest
@@ -77,7 +22,6 @@ ID,1950,2016
 76,Closed forest,Dense forest
 77,Closed forest,Dense forest
 78,Closed forest,Grassland
-79,Closed forest,Open forest
 80,Closed forest,Open forest
 81,Dense forest,Dense forest
 82,Dense forest,Dense forest
@@ -91,11 +35,67 @@ ID,1950,2016
 90,Dense forest,Dense forest
 91,Dense forest,Dense forest
 92,Dense forest,Dense forest
-93,Dense forest,Grassland
 94,Dense forest,Woodland
-95,Dense forest,Woodland
-96,Agriculture,Agriculture
-97,Agriculture,Woodland
-98,Agriculture,Woodland
+1,Grassland,Grassland
+2,Grassland,Grassland
+3,Grassland,Grassland
+4,Grassland,Grassland
+5,Grassland,Grassland
+6,Grassland,Agriculture
+7,Grassland,Urban
+8,Grassland,Urban
+9,Grassland,Woodland
+10,Grassland,Woodland
+11,Grassland,Woodland
+12,Grassland,Open forest
+13,Grassland,Open forest
+14,Grassland,Open forest
+15,Grassland,Open forest
+16,Grassland,Closed forest
+17,Grassland,Closed forest
+18,Grassland,Closed forest
+19,Grassland,Closed forest
+20,Grassland,Closed forest
+21,Grassland,Woodland
+29,Grassland,Open forest
+79,Grassland,Open forest
+41,Open forest,Open forest
+42,Open forest,Open forest
+43,Open forest,Open forest
+44,Open forest,Closed forest
+45,Open forest,Closed forest
+46,Open forest,Closed forest
+47,Open forest,Closed forest
+48,Open forest,Closed forest
+49,Open forest,Closed forest
+50,Open forest,Closed forest
+51,Open forest,Closed forest
+52,Open forest,Closed forest
+53,Open forest,Dense forest
+54,Open forest,Dense forest
+55,Open forest,Dense forest
+56,Open forest,Dense forest
+57,Open forest,Dense forest
+58,Open forest,Dense forest
+59,Open forest,Dense forest
+60,Open forest,Grassland
 99,Urban,Urban
 100,Urban,Urban
+22,Woodland,Woodland
+23,Woodland,Woodland
+24,Woodland,Closed forest
+25,Woodland,Closed forest
+26,Woodland,Closed forest
+27,Woodland,Agriculture
+28,Woodland,Urban
+30,Woodland,Open forest
+31,Woodland,Open forest
+32,Woodland,Open forest
+33,Woodland,Closed forest
+34,Woodland,Closed forest
+35,Woodland,Closed forest
+36,Woodland,Closed forest
+37,Woodland,Closed forest
+38,Woodland,Dense forest
+39,Woodland,Dense forest
+40,Woodland,Dense forest

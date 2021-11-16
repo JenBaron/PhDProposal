@@ -9,22 +9,28 @@ output:
     toc_float: yes
 ---
 
+# Load Packages
+
 ```{r}
 library(dplyr)
 library(ggplot2)
 library(tidyr)
 ```
  
-
+For markov models
 ```{r}
-source(here("rel.R")) # relativize by row sum
-source(here("fix_tm.R")) # for annual time steps
+source("rel.R") # relativize by row sum
+source("fix_tm.R") # for annual time steps
 ```
+
+# Read Data
 
 ```{r}
 rmt.data <- read.csv("data/Transition_data.csv")
-str(rmt.data)
+rmt.data2 <- rmt.data
 ```
+
+# Visualize Data
 
 ```{r}
 sample.n <- dim(rmt.data)[[1]] # number of rows in the dataset
@@ -44,17 +50,16 @@ years <- c(1950, 2016)
 rmt.d2 <- rbind(as.vector(p1950), as.vector(p2016)) #combine initial conditions
 rmt.d2 <- data.frame(cbind(years, rmt.d2)) #attach years
 
-names(rmt.d2) <- c("Year","Agriculture","Closed forest","Dense forest","Open forest","Urban", "Woodland") #fix names
+class <- t1950 %>% as.data.frame() %>% select(Var1) 
 
-rmt.d2
+names(rmt.d2) <- c("Year","Agriculture", "Closed forest", 
+                   "Dense forest", "Grassland", "Agriculture", "Urban")
 ```
-
-
 Prepare the data to plot
 
 ```{r}
 rmt.d2_long <- rmt.d2 %>% 
-  pivot_longer(cols=starts_with("V"), 
+  pivot_longer(cols=c(2:8), 
                names_to="Class", 
                values_to="Proportion") #convert to "long" format to plot
 head(rmt.d2_long)
@@ -63,8 +68,79 @@ head(rmt.d2_long)
 Visualize the data
 
 ```{r}
-ggplot(rmt.d2_long, aes(x=years, y=Proportion, col = Class)) +
-  geom_line() +
-  geom_point() +
-  theme_classic()
+rmt.d2_long$Class <- rmt.d2_long$Class %>% factor(c("Dense forest", "Closed forest", "Open forest",
+                        "Woodland", "Grassland", "Agriculture", "Urban"))
+
+class.pal <- c("darkgreen", "springgreen4", "yellowgreen", "darkgoldenrod4", "darkgoldenrod2", "slateblue4", "slategrey")
 ```
+
+
+```{r}
+f1_prop <- ggplot(rmt.d2_long, aes(x=Year, y=Proportion, col = Class)) +
+  geom_line(size=1) +
+  geom_point(size=2) +
+  scale_x_continuous(limits = c(1950, 2016), n.breaks = 8) +
+  ylab("Proportion of Landscape") +
+  scale_color_manual(values=class.pal) +
+  theme_classic()
+
+f1_prop
+```
+```{r}
+ggsave("figures/1_class_proportions.png", f1_prop, width=7, height =5)
+```
+
+# Transition Matrix
+
+Fix order of levels
+```{r}
+rmt.data2$X1950 <- recode(rmt.data2$X1950,
+       "Dense forest" = "V1",
+       "Closed forest" = "V2",
+       "Open forest" = "V3",
+       "Woodland" = "V4", 
+       "Grassland" = "V5", 
+       "Agriculture" = "V6", 
+       "Urban" = "V7")
+rmt.data2$X2016 <- recode(rmt.data2$X2016,
+       "Dense forest" = "V1",
+       "Closed forest" = "V2",
+       "Open forest" = "V3",
+       "Woodland" = "V4", 
+       "Grassland" = "V5", 
+       "Agriculture" = "V6", 
+       "Urban" = "V7")
+```
+
+```{r}
+#build the tally matrix
+t.50.16 <- table(rmt.data2$X1950,rmt.data2$X2016)
+t.50.16 
+
+# transition matrix
+#relativize by row sum 
+P.50.16 <- rel(t.50.16, byrow=TRUE, bycol=FALSE)
+
+P.50.16 %>% round(2)
+
+# this is for a 66-yr time step, but we need annual steps
+P <- fix.steps(P.50.16, 66) #specify number of years in time-step here
+
+P %>% round(2)
+```
+# Save Outputs
+
+```{r}
+write.csv(P.50.16, "outputs/transition_matrix_1950_2016.csv")
+write.csv(P, "outputs/transition_matrix_annual.csv")
+```
+
+
+# Reproducibility
+
+```{r}
+git2r::repository()
+Sys.time()
+sessionInfo()
+```
+
