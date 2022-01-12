@@ -1,0 +1,193 @@
+---
+title: "Timeline"
+author: "Jen Baron"
+date: "1/11/2022"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(scales)
+library(lubridate)
+library(dplyr)
+library(ggrepel)
+library(ggbreak)
+library(nationalparkcolors)
+library(stringr)
+library(ggfittext)
+```
+
+https://pharmacoecon.me/post/2021-04-18-timeline-graph/
+
+
+
+#With Axis Breaks
+
+```{r}
+phases <- data.frame(
+  start = c(1500, 1850, 1919, 1940, 2003),
+  end = c(1850, 1919, 1940, 2003, 2021),
+  phase=as.factor(c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era"))
+)
+
+phases$phase <- factor(phases$phase, levels = c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era")) 
+  
+changes <- data.frame(
+  change = c(1850, 1919, 1940, 2003, 2022)
+)
+```
+
+```{r}
+pal <- park_palette("Arches")
+
+ggplot() +
+  #colored rectangles (phases)
+  geom_rect(data=phases, 
+              aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf,
+                  fill=phase), alpha=0.5) +
+  #dashed breakpoints
+  geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
+  #custom colours
+  scale_fill_manual(values = pal, name = "", 
+                    labels=function(x) str_wrap(x, width=15)) +
+  scale_x_continuous(breaks=c(1500, 1850, 1919, 1940, 2003), limits = c(1500, 2021)) +
+  scale_y_continuous(limits=c(0,0.6)) +
+  #break axis
+  scale_x_break(c(1520, 1830)) +
+  #scale_x_break(c(1870, 1910)) +
+  #theme customization
+  theme_classic() +
+  theme(legend.position = "bottom",
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"),
+                                                       ends = "last")))
+
+```
+#With Milestones
+
+```{r}
+phases2 <- data.frame(
+  start = c(1820, 1850, 1919, 1940, 2003, 2022),
+  end = c(1850, 1919, 1940, 2003, 2022, 2050),
+  phase=as.factor(c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era", "Future fire"))
+)
+
+phases2$phase <- factor(phases2$phase, levels = c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era", "Future fire")) 
+
+milestones <- data.frame(
+  year = c(1910, 1931, 1985, 2003, 2017, 2018),
+  milestone = c("The 'Great Burn' threatens town of Cranbrook",
+                "Largest fire season on record",
+                "Multiple fires escape suppression",
+                "'Firestorm' threatens communities",
+                "Back-to-back record-breaking fire seasons",
+                "")) %>%
+  mutate(
+    # Specify y-direction for milestone
+    position = c(0.1, 0.25, 0.01, 0.15, .25, .10), 
+    # Specify text position
+    text_position = 0.07 + position)
+```
+
+
+```{r}
+ggplot() +
+  #colored rectangles (phases)
+  geom_rect(data=phases2, 
+              aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf,
+                  fill=phase), alpha=0.5) +
+  #dashed breakpoints
+  geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
+   #add milestones
+  geom_segment(data=milestones, aes(x=year,y=position,xend=year, yend=-Inf), 
+               color='black', size=0.2) +
+  geom_point(data = milestones, aes(x=year,y=position), size=1.5) + 
+  #add labels
+  geom_text(data=milestones, 
+            aes(x=year,y=position+0.015,label=year, fontface="bold"),size=3,
+            color='black') + 
+  geom_label_repel(data = milestones,
+                  aes(x=year,y=text_position,label=str_wrap(milestone,15)),
+                  size=3,
+                  point.size=NA)  +
+  #custom colours
+  scale_fill_manual(values = pal, name = "", 
+                    labels=function(x) str_wrap(x, width=15)) +
+  scale_x_continuous(breaks=c(1850, 1919, 1940, 2003, 2021), 
+                     limits = c(1820, 2050),expand = c(0, 0)) +
+  scale_y_continuous(limits=c(0,0.4)) +
+  #theme customization
+  theme_classic() +
+  theme(legend.position = "bottom",
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.line.y = element_blank(), 
+        axis.text.x = element_text(face="bold", size="10"),
+        axis.line.x = element_line(size=0.5, 
+                                   arrow = grid::arrow(length = unit(0.4, "cm"),
+                                                       ends = "last")))
+```
+```{r}
+phases2 <- phases2 %>% mutate(
+  mid = start+(((end-start)/2)),
+  text = c(
+  "Frequent, low- & mixed-severity surface fire regime",
+  "Indigenous burning is lost, replaced by land-clearance and settlement",
+  "Resource extraction causes large fires across landscape",
+  "Fire suppression & timber management drive fuel accumulation",
+  "Fire deficits interact with extreme fire weather",
+  NA))
+
+changes <- changes %>%
+  mutate(
+    text = c("Euro-Canadian colonization",
+              NA,
+              "Widespread fire suppression",
+              "Climate & fuels tipping point",
+             NA))
+```
+
+```{r}
+ggplot() +
+   geom_rect(data=phases2, 
+              aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf,
+                  fill=phase), alpha=0.5) +
+  geom_fit_text(data=phases2,
+                aes(xmin=start, xmax=end,
+                    y=0,label=str_wrap(text,10)))+
+  geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
+ 
+  geom_label(data=changes, aes(x=change, y=0.3, label=str_wrap(text,15))) +
+  scale_x_continuous(breaks=c(1850, 1919, 1940, 2003), 
+                     limits = c(1820, 2050),expand = c(0, 0)) +
+  #scale_y_continuous(limits=c(0,0.4)) +
+  scale_fill_manual(values = pal, name = "", 
+                    labels=function(x) str_wrap(x, width=20)) +
+  theme_bw() +
+    theme(legend.position = "none",
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.line.y = element_blank(),
+        axis.text.x = element_blank())
+```
+```{r}
+methods.table <- data.frame(
+chapter = c("Chapter 1", "Chapter 2", "Chapters 3 & 4"),
+change = c("fire deficit",
+           "landscape change & fuel accumulation", 
+           "fire risk"),
+time_period= c("1919-2019",
+               "1950, 2016", 
+               "1950, 2021"),
+drivers = c("historical fire frequency & 20th century fire suppression",
+            "fire suppression, forest management", 
+           "fire deficit, fuel accumulation, and values at risk"),
+method = c("historical fire perimeters & fire history (existing)",
+           "historical air photos", 
+           "simulation modelling")
+
+)
+```
+
+ geom_segment(data=changes,aes(x=change,y=0.3,xend=change, yend=-Inf), 
+               color='darkred', size=0.6) +
