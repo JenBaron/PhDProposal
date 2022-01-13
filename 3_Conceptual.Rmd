@@ -8,21 +8,20 @@ output: html_document
 ```{r}
 library(ggplot2)
 library(scales)
-library(lubridate)
 library(dplyr)
 library(ggrepel)
 library(ggbreak)
 library(nationalparkcolors)
 library(stringr)
 library(ggfittext)
+library(ggpubr)
 ```
 
 https://pharmacoecon.me/post/2021-04-18-timeline-graph/
 
+# Timeline
 
-
-#With Axis Breaks
-
+## Axis breaks
 ```{r}
 phases <- data.frame(
   start = c(1500, 1850, 1919, 1940, 2003),
@@ -61,14 +60,13 @@ ggplot() +
         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
         axis.line.x = element_line(arrow = grid::arrow(length = unit(0.3, "cm"),
                                                        ends = "last")))
-
 ```
-#With Milestones
+## Milestones
 
 ```{r}
 phases2 <- data.frame(
   start = c(1820, 1850, 1919, 1940, 2003, 2022),
-  end = c(1850, 1919, 1940, 2003, 2022, 2050),
+  end = c(1850, 1919, 1940, 2003, 2022, 2040),
   phase=as.factor(c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era", "Future fire"))
 )
 
@@ -86,12 +84,12 @@ milestones <- data.frame(
     # Specify y-direction for milestone
     position = c(0.1, 0.25, 0.01, 0.15, .25, .10), 
     # Specify text position
-    text_position = 0.07 + position)
+    text_position = 0.08 + position)
 ```
 
 
 ```{r}
-ggplot() +
+fig.milestones <- ggplot() +
   #colored rectangles (phases)
   geom_rect(data=phases2, 
               aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf,
@@ -100,7 +98,7 @@ ggplot() +
   geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
    #add milestones
   geom_segment(data=milestones, aes(x=year,y=position,xend=year, yend=-Inf), 
-               color='black', size=0.2) +
+               color='black', size=0.4) +
   geom_point(data = milestones, aes(x=year,y=position), size=1.5) + 
   #add labels
   geom_text(data=milestones, 
@@ -113,30 +111,36 @@ ggplot() +
   #custom colours
   scale_fill_manual(values = pal, name = "", 
                     labels=function(x) str_wrap(x, width=15)) +
-  scale_x_continuous(breaks=c(1850, 1919, 1940, 2003, 2021), 
-                     limits = c(1820, 2050),expand = c(0, 0)) +
+  scale_x_continuous(breaks=c(1850, 1919, 1940, 2003, 2022), 
+                     limits = c(1820, 2040),expand = c(0, 0)) +
   scale_y_continuous(limits=c(0,0.4)) +
+  guides(fill = guide_legend(nrow=1)) +
   #theme customization
   theme_classic() +
   theme(legend.position = "bottom",
         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
         axis.title.x = element_blank(), axis.title.y = element_blank(),
         axis.line.y = element_blank(), 
-        axis.text.x = element_text(face="bold", size="10"),
+        axis.text.x = element_text(face="bold", size="12"),
+        legend.text = element_text(size="11"),
         axis.line.x = element_line(size=0.5, 
                                    arrow = grid::arrow(length = unit(0.4, "cm"),
                                                        ends = "last")))
+
+fig.milestones
 ```
+
+## Descriptive phases
 ```{r}
 phases2 <- phases2 %>% mutate(
   mid = start+(((end-start)/2)),
   text = c(
   "Frequent, low- & mixed-severity surface fire regime",
-  "Indigenous burning is lost, replaced by land-clearance and settlement",
-  "Resource extraction causes large fires across landscape",
-  "Fire suppression & timber management drive fuel accumulation",
-  "Fire deficits interact with extreme fire weather",
-  NA))
+  "Indigenous burning replaced by land-clearance and early settlement",
+  "Resource extraction and land-use drives an active fire regime",
+  "Fire suppression & timber management create fire deficit & fuel accumulation",
+  "Fire deficit interacts with extreme fire weather to escape suppression",
+  "Projected increases in extreme fire behaviour & fire effects"))
 
 changes <- changes %>%
   mutate(
@@ -148,46 +152,96 @@ changes <- changes %>%
 ```
 
 ```{r}
-ggplot() +
+fig.desc <- ggplot() +
    geom_rect(data=phases2, 
-              aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf,
+              aes(xmin=start, xmax=end, ymin=0, ymax=1,
                   fill=phase), alpha=0.5) +
-  geom_fit_text(data=phases2,
+  geom_fit_text(data=phases2, #fits text to size of rectangles
                 aes(xmin=start, xmax=end,
-                    y=0,label=str_wrap(text,10)))+
+                    y=0.5,label=str_wrap(text,10)))+
   geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
- 
-  geom_label(data=changes, aes(x=change, y=0.3, label=str_wrap(text,15))) +
+  geom_label(data=changes, aes(x=change, y=0.9, label=str_wrap(text,15))) +
   scale_x_continuous(breaks=c(1850, 1919, 1940, 2003), 
-                     limits = c(1820, 2050),expand = c(0, 0)) +
-  #scale_y_continuous(limits=c(0,0.4)) +
+                     limits = c(1820, 2040),expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
   scale_fill_manual(values = pal, name = "", 
                     labels=function(x) str_wrap(x, width=20)) +
+  guides(fill = guide_legend(nrow=1)) +
   theme_bw() +
-    theme(legend.position = "none",
+  theme(legend.position = "none",
         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
         axis.title.x = element_blank(), axis.title.y = element_blank(),
         axis.line.y = element_blank(),
-        axis.text.x = element_blank())
+        axis.text.x = element_blank(),
+        legend.text = element_text(size="11"),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+fig.desc
 ```
+
+```{r}
+fig.timeline <- ggarrange(fig.desc,fig.milestones,
+          nrow=2, common.legend=TRUE, legend = "top")
+fig.timeline
+ggsave("figures/3_timeline.png", fig.timeline, dpi=300, width=10, height=7)
+
+```
+
+
+# Methods Table
 ```{r}
 methods.table <- data.frame(
 chapter = c("Chapter 1", "Chapter 2", "Chapters 3 & 4"),
 change = c("fire deficit",
-           "landscape change & fuel accumulation", 
-           "fire risk"),
+           "fuel accumulation", 
+           "fire exposure & risk"),
 time_period= c("1919-2019",
                "1950, 2016", 
                "1950, 2021"),
 drivers = c("historical fire frequency & 20th century fire suppression",
             "fire suppression, forest management", 
            "fire deficit, fuel accumulation, and values at risk"),
-method = c("historical fire perimeters & fire history (existing)",
+method = c("historical fire perimeters",
            "historical air photos", 
            "simulation modelling")
 
 )
 ```
 
- geom_segment(data=changes,aes(x=change,y=0.3,xend=change, yend=-Inf), 
-               color='darkred', size=0.6) +
+# Diagram
+
+```{r}
+library(DiagrammeR)
+```
+
+
+
+```{r}
+grViz("
+digraph boxes_and_circles {
+
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 10]
+
+  # several 'node' statements
+  node [shape = box,
+        fontname = Helvetica]
+  A; B; C; D; E; F
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 0.9] // sets as circles
+  1; 2; 3; 4; 5; 6; 7; 8
+
+  # several 'edge' statements
+  A->1 B->2 B->3 B->4 C->A
+  1->D E->A 2->4 1->5 1->F
+  E->6 4->6 5->7 6->7 3->8
+}
+")
+```
+
+
+
+
+
+
