@@ -1,7 +1,7 @@
 ---
-title: "Timeline"
+title: "Conceptual Timeline"
 author: "Jen Baron"
-date: "1/11/2022"
+date: "Jan 12 2022"
 output: html_document
 ---
 
@@ -239,9 +239,95 @@ digraph boxes_and_circles {
 }
 ")
 ```
+```{r}
+graph <- grViz("
+digraph boxes_and_circles {
+
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 10]
+
+  # several 'node' statements
+  node [shape = box,
+        fontname = Helvetica]
+A [label = 'Fire suppression']
+B [label = 'Timber management']
+C [label = 'Mild 20th century climate']
+D [label = 'Colonization & loss of Indigenous fire']
+E [label = 'Climate change']
+F [label = 'Extreme fire weather']
+G [label = 'WUI & communities']
+H [label = 'Increasing lightning ignitions']
+I [label = 'Post-WWII technologies']
+J [label = 'Social & ecological values']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=darkorange,penwidth=2] 
+1 [label = 'Fuel accumulation']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=maroon,penwidth=2] 
+2 [label = 'Fire deficit']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=gold] 
+3 [label = 'Fire behaviour']
+
+  node[shape = triangle, width=2, height=2, color=black]
+a [label = 'Fire risk']
+
+  # several 'edge' statements
+  A->1 A->2 C->A B->1 D->2 B->A
+  1->a 2->a E->F F->3 G->2 2->1
+  G->a H->3 I->A 3->a 1->3 J->a
+}
+")
+graph
+```
+
+```{r}
+nodes <-
+  create_nodes(
+    nodes = c("a", "b", "c", "d"),
+    label = FALSE,
+    type = "lower",
+    style = "filled",
+    color = "aqua",
+    shape = c("circle", "circle",
+              "rectangle", "rectangle"),
+    data = c(3.5, 2.6, 9.4, 2.7))
+
+edges <-
+  create_edges(
+    from = c("a", "b", "c"),
+    to = c("d", "c", "a"),
+    rel = "leading_to")
+
+graph <-
+  create_graph(
+    nodes_df = nodes,
+    edges_df = edges,
+    node_attrs = "fontname = Helvetica",
+    edge_attrs = c("color = blue",
+                   "arrowsize = 2"))
+```
+
+
+```{r}
+```
 
 
 
+
+# Reproducibility
+
+```{r}
+git2r::repository()
+Sys.time()
+sessionInfo()
+```
 
 
 
