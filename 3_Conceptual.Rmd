@@ -240,25 +240,27 @@ digraph boxes_and_circles {
 ")
 ```
 ```{r}
-graph <- grViz("
+graph1 <- grViz("
 digraph boxes_and_circles {
 
   # a 'graph' statement
-  graph [overlap = true, fontsize = 10]
+  graph [overlap = true, fontsize = 12]
 
   # several 'node' statements
   node [shape = box,
         fontname = Helvetica]
-A [label = 'Fire suppression']
+A [label = 'Fire suppression\n paradigm']
 B [label = 'Timber management']
-C [label = 'Mild 20th century climate']
-D [label = 'Colonization & loss of Indigenous fire']
+C [label = 'Mild 20th\n century climate']
+D [label = 'Loss of Indigenous fire\n through colonization']
 E [label = 'Climate change']
 F [label = 'Extreme fire weather']
-G [label = 'WUI & communities']
-H [label = 'Increasing lightning ignitions']
+G [label = 'Wildland-urban interface\n & communities']
+H [label = 'Increasing\n lightning ignitions']
 I [label = 'Post-WWII technologies']
 J [label = 'Social & ecological values']
+K [label = 'Fire season length']
+L [label = 'Complex topography']
 
   node [shape = circle,
         fixedsize = true,
@@ -275,47 +277,79 @@ J [label = 'Social & ecological values']
         width = 1.7, color=gold] 
 3 [label = 'Fire behaviour']
 
-  node[shape = triangle, width=2, height=2, color=black]
-a [label = 'Fire risk']
+  node[shape = triangle, width=2.5, height=2.5, color=black]
+4 [label = 'Contemporary\n fire risk']
 
   # several 'edge' statements
   A->1 A->2 C->A B->1 D->2 B->A
-  1->a 2->a E->F F->3 G->2 2->1
-  G->a H->3 I->A 3->a 1->3 J->a
+  E->K K->4 L->3  D->A E->H
+  1->4 2->4 E->F F->3 G->2 2->1
+  G->4 H->3 I->A 3->4 1->3 J->4
 }
 ")
-graph
+graph1
 ```
+Try to create NDF & EDF to customize displays
+
 
 ```{r}
-nodes <-
-  create_nodes(
-    nodes = c("a", "b", "c", "d"),
-    label = FALSE,
-    type = "lower",
-    style = "filled",
-    color = "aqua",
-    shape = c("circle", "circle",
-              "rectangle", "rectangle"),
-    data = c(3.5, 2.6, 9.4, 2.7))
+# Create a node data frame (ndf)
+ndf <- create_node_df(n = 4,
+                      label = c("hi stacko", "aaa", "bbb", "ccc"))
 
-edges <-
-  create_edges(
-    from = c("a", "b", "c"),
-    to = c("d", "c", "a"),
-    rel = "leading_to")
+# Create an edge data frame (edf)
+edf <- create_edge_df(from = c(1, 2, 3, 3),
+                      to = c(4, 3, 1, 4))
 
-graph <-
-  create_graph(
-    nodes_df = nodes,
-    edges_df = edges,
-    node_attrs = "fontname = Helvetica",
-    edge_attrs = c("color = blue",
-                   "arrowsize = 2"))
+# Create a graph with the ndf and edf
+graph <- create_graph(nodes_df = ndf,
+                      edges_df = edf)
 ```
 
 
 ```{r}
+nodes_1 <- create_node_df(n=12,
+                      nodes = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"),
+                      label=c("Fire suppression paradigm", 
+                              "Timber management", 
+                              "Mild 20th century climate",
+                              'Loss of Indigenous fire\n through colonization',
+                              'Climate change',
+                              'Extreme fire weather',
+                              'Wildland-urban interface\n & communities',
+                              'Increasing\n lightning ignitions',
+                              'Post-WWII technologies',
+                              'Social & ecological values',
+                              'Fire season length',
+                              'Complex topography' ),
+                      color = "black",
+                      shape = "box")
+
+nodes_2 <- create_node_df(n=4,
+                          nodes = 13:16,
+                          label=c("Fuel accumulation", "Fire deficit", "Fire behaviour", "Contemporary\n fire risk"),
+                          color = c("darkorange", "maroon", "gold", "black"),
+                          shape=c("circle", "circle", "circle", "triangle"))
+
+ndf <- rbind(nodes_1, nodes_2)
+
+#currently not working with letters
+edf <- create_edge_df(from = c("A", "A", "C", "B", "D", "B",
+                               "E", "K", "L", "D", "E",
+                               1, 2, "E", "F", "G", 2,
+                               "G", "H", "I", 3, 1, "J"),
+                      to = c(1, 2, "A", 1, 2, "A",
+                             "K", 4, 3, "A", "H",
+                             4, 4, "F", 3, 2, 1,
+                             4, 3, "A", 4, 3, 4))
+
+```
+
+
+```{r}
+graph <- create_graph(nodes_df = ndf,
+                      edges_df = edf)
+graph %>% render_graph()
 ```
 
 
