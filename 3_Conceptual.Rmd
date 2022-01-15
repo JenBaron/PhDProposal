@@ -15,6 +15,8 @@ library(nationalparkcolors)
 library(stringr)
 library(ggfittext)
 library(ggpubr)
+library(DiagrammeR)
+library(DiagrammeRsvg)
 ```
 
 https://pharmacoecon.me/post/2021-04-18-timeline-graph/
@@ -210,42 +212,10 @@ method = c("historical fire perimeters",
 # Diagram
 
 ```{r}
-library(DiagrammeR)
-```
-
-
-
-```{r}
-grViz("
-digraph boxes_and_circles {
-
-  # a 'graph' statement
-  graph [overlap = true, fontsize = 10]
-
-  # several 'node' statements
-  node [shape = box,
-        fontname = Helvetica]
-  A; B; C; D; E; F
-
-  node [shape = circle,
-        fixedsize = true,
-        width = 0.9] // sets as circles
-  1; 2; 3; 4; 5; 6; 7; 8
-
-  # several 'edge' statements
-  A->1 B->2 B->3 B->4 C->A
-  1->D E->A 2->4 1->5 1->F
-  E->6 4->6 5->7 6->7 3->8
-}
-")
-```
-```{r}
 graph1 <- grViz("
 digraph boxes_and_circles {
-
   # a 'graph' statement
   graph [overlap = true, fontsize = 12]
-
   # several 'node' statements
   node [shape = box,
         fontname = Helvetica]
@@ -261,25 +231,20 @@ I [label = 'Post-WWII technologies']
 J [label = 'Social & ecological values']
 K [label = 'Fire season length']
 L [label = 'Complex topography']
-
   node [shape = circle,
         fixedsize = true,
         width = 1.7, color=darkorange,penwidth=2] 
 1 [label = 'Fuel accumulation']
-
   node [shape = circle,
         fixedsize = true,
         width = 1.7, color=maroon,penwidth=2] 
 2 [label = 'Fire deficit']
-
   node [shape = circle,
         fixedsize = true,
         width = 1.7, color=gold] 
 3 [label = 'Fire behaviour']
-
   node[shape = triangle, width=2.5, height=2.5, color=black]
 4 [label = 'Contemporary\n fire risk']
-
   # several 'edge' statements
   A->1 A->2 C->A B->1 D->2 B->A
   E->K K->4 L->3  D->A E->H
@@ -289,22 +254,107 @@ L [label = 'Complex topography']
 ")
 graph1
 ```
-Try to create NDF & EDF to customize displays
+
 
 
 ```{r}
-# Create a node data frame (ndf)
-ndf <- create_node_df(n = 4,
-                      label = c("hi stacko", "aaa", "bbb", "ccc"))
 
-# Create an edge data frame (edf)
-edf <- create_edge_df(from = c(1, 2, 3, 3),
-                      to = c(4, 3, 1, 4))
+#C [label = 'Mild 20th\n century climate']
+#I [label = 'Technological \nadvancement']
 
-# Create a graph with the ndf and edf
-graph <- create_graph(nodes_df = ndf,
-                      edges_df = edf)
+pathways <- grViz("
+digraph boxes_and_circles {
+
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 12]
+
+  # several 'node' statements
+  node [shape = box, fontname = Helvetica]
+D [label = 'Loss of Indigenous fire\n through colonization']
+F [label = 'Extreme fire weather']
+H [label = 'Increasing\n lightning ignitions']
+J [label = 'Social & ecological\n values']
+K [label = 'Fire season length']
+M [label = 'Fuel type transitions']
+
+
+  node [width=1, height=1, 
+fontsize=14, color=saddlebrown]
+A [label = 'Fire suppression\n paradigm']
+B [label = 'Timber\n management']
+E [label = 'Climate change']
+G [label = 'WUI\n & communities']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=darkorange,penwidth=2] 
+1 [label = 'Fuel\n accumulation']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=maroon,penwidth=2] 
+2 [label = 'Fire deficit']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=gold] 
+3 [label = 'Fire\nbehaviour']
+
+  node[shape = circle, fixedsize = true,
+        width = 1.7, color=black]
+4 [label = 'Contemporary\n fire risk']
+
+  # several 'edge' statements
+  A->M A->2 D->2 B->A
+  E->K K->4  D->A E->H
+  1->4 2->4 E->F F->3 2->1
+  G->4 H->3 3->4 1->3 J->4
+  G->M M->1 B->M E->M M->3 
+}
+")
+pathways 
+
+pathways %>%
+    export_svg() %>%
+    charToRaw %>% 
+    rsvg_png("figures/4_pathways.png")
 ```
+Through my doctoral research I will identify and quantify the drivers, interactions, and feedbacks that characterize disrupted fire regimes. 
+
+```{r}
+legend <- grViz("
+digraph boxes_and_circles {
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1, color=maroon,penwidth=2] 
+2 [label = 'Chapter 1']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1, color=darkorange,penwidth=2] 
+1 [label = 'Chapter 2']
+
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1, color=gold] 
+3 [label = 'Chapters\n 3 & 4']
+}
+")
+
+legend
+```
+
+
+
+
+
+
+
+**Try to create NDF & EDF to customize displays**
+
+Not working right now - 
 
 
 ```{r}
@@ -336,12 +386,12 @@ ndf <- rbind(nodes_1, nodes_2)
 #currently not working with letters
 edf <- create_edge_df(from = c("A", "A", "C", "B", "D", "B",
                                "E", "K", "L", "D", "E",
-                               1, 2, "E", "F", "G", 2,
-                               "G", "H", "I", 3, 1, "J"),
-                      to = c(1, 2, "A", 1, 2, "A",
-                             "K", 4, 3, "A", "H",
-                             4, 4, "F", 3, 2, 1,
-                             4, 3, "A", 4, 3, 4))
+                               13, 14, "E", "F", "G", 14,
+                               "G", "H", "I", 15, 13, "J"),
+                      to = c(13, 14, "A", 13, 14, "A",
+                             "K", 16, 15, "A", "H",
+                             16, 16, "F", 15, 14, 13,
+                             16, 15, "A", 16, 15, 16))
 
 ```
 
