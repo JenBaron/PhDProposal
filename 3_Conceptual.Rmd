@@ -17,13 +17,15 @@ library(ggfittext)
 library(ggpubr)
 library(DiagrammeR)
 library(DiagrammeRsvg)
+library(ggprism)
 ```
 
 https://pharmacoecon.me/post/2021-04-18-timeline-graph/
 
 # Timeline
 
-## Axis breaks
+## Phases
+
 ```{r}
 phases <- data.frame(
   start = c(1500, 1850, 1919, 1940, 2003),
@@ -34,12 +36,11 @@ phases <- data.frame(
 phases$phase <- factor(phases$phase, levels = c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era")) 
   
 changes <- data.frame(
-  change = c(1850, 1919, 1940, 2003, 2022)
-)
+  change = c(1850, 1919, 1940, 2003, 2022))
 ```
 
 ```{r}
-pal <- park_palette("Arches")
+pal <- park_palette("MtMckinley")
 
 ggplot() +
   #colored rectangles (phases)
@@ -69,24 +70,25 @@ ggplot() +
 phases2 <- data.frame(
   start = c(1820, 1850, 1919, 1940, 2003, 2022),
   end = c(1850, 1919, 1940, 2003, 2022, 2040),
-  phase=as.factor(c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era", "Future fire"))
+  phase=as.factor(c("Indigenous fire stewardship", "Early colonization", "Active but altered fire regime", "Fire suppression era", "Modern era", "Future fire (uncertain)"))
 )
 
-phases2$phase <- factor(phases2$phase, levels = c("Indigenous fire stewardship", "Early colonization", "Active but altered", "Fire suppression era", "Modern era", "Future fire")) 
+phases2$phase <- factor(phases2$phase, levels = c("Indigenous fire stewardship", "Early colonization", "Active but altered fire regime", "Fire suppression era", "Modern era", "Future fire (uncertain)")) 
 
 milestones <- data.frame(
   year = c(1910, 1931, 1985, 2003, 2017, 2018),
+  label = c(1910, 1931, 1985, 2003, 2017, NA),
   milestone = c("The 'Great Burn' threatens town of Cranbrook",
-                "Largest fire season on record",
+                "Largest area burned on record",
                 "Multiple fires escape suppression",
                 "'Firestorm' threatens communities",
                 "Back-to-back record-breaking fire seasons",
                 "")) %>%
   mutate(
     # Specify y-direction for milestone
-    position = c(0.1, 0.25, 0.01, 0.15, .25, .10), 
+    position = c(0.05, 0.3, 0.01, 0.13, .26, .2), 
     # Specify text position
-    text_position = 0.08 + position)
+    text_position = 0.077 + position)
 ```
 
 
@@ -104,31 +106,33 @@ fig.milestones <- ggplot() +
   geom_point(data = milestones, aes(x=year,y=position), size=1.5) + 
   #add labels
   geom_text(data=milestones, 
-            aes(x=year,y=position+0.015,label=year, fontface="bold"),size=3,
-            color='black') + 
+            aes(x=year,y=position+0.02,label=label, fontface="bold"),size=4,
+            color='black',family="Georgia") + 
   geom_label_repel(data = milestones,
-                  aes(x=year,y=text_position,label=str_wrap(milestone,15)),
+                  aes(x=year,y=text_position,label=str_wrap(milestone,16)),
                   size=3,
-                  point.size=NA)  +
+                  point.size=NA, family="Georgia")  +
   #custom colours
   scale_fill_manual(values = pal, name = "", 
                     labels=function(x) str_wrap(x, width=15)) +
   scale_x_continuous(breaks=c(1850, 1919, 1940, 2003, 2022), 
-                     limits = c(1820, 2040),expand = c(0, 0)) +
+                     limits = c(1820, 2040),expand = c(0, 0),
+                     guide = "prism_minor", minor_breaks = seq(1820, 2030, 10)) + #minor breaks
   scale_y_continuous(limits=c(0,0.4)) +
-  guides(fill = guide_legend(nrow=1)) +
+  labs(fill = "Phase") +
   #theme customization
   theme_classic() +
-  theme(legend.position = "bottom",
+  theme(text = element_text(family = "Georgia"),
+        legend.position = "bottom",
         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
         axis.title.x = element_blank(), axis.title.y = element_blank(),
         axis.line.y = element_blank(), 
-        axis.text.x = element_text(face="bold", size="12"),
+        axis.text.x = element_text(face="bold", size="16"),
         legend.text = element_text(size="11"),
+        prism.ticks.length.x = unit(3, "pt"),
         axis.line.x = element_line(size=0.5, 
                                    arrow = grid::arrow(length = unit(0.4, "cm"),
                                                        ends = "last")))
-
 fig.milestones
 ```
 
@@ -139,8 +143,8 @@ phases2 <- phases2 %>% mutate(
   text = c(
   "Frequent, low- & mixed-severity surface fire regime",
   "Indigenous burning replaced by land-clearance and early settlement",
-  "Resource extraction and land-use drives an active fire regime",
-  "Fire suppression & timber management create fire deficit & fuel accumulation",
+  "Settler resource extraction drives an active fire regime",
+  "Fire suppression and timber management create fire deficit & fuel accumulation",
   "Fire deficit interacts with extreme fire weather to escape suppression",
   "Projected increases in extreme fire behaviour & fire effects"))
 
@@ -155,14 +159,15 @@ changes <- changes %>%
 
 ```{r}
 fig.desc <- ggplot() +
-   geom_rect(data=phases2, 
+  geom_rect(data=phases2, 
               aes(xmin=start, xmax=end, ymin=0, ymax=1,
                   fill=phase), alpha=0.5) +
   geom_fit_text(data=phases2, #fits text to size of rectangles
                 aes(xmin=start, xmax=end,
-                    y=0.5,label=str_wrap(text,10)))+
+                    ymin=0, ymax=1,label=text), 
+                reflow=TRUE,family="Georgia")+
   geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
-  geom_label(data=changes, aes(x=change, y=0.9, label=str_wrap(text,15))) +
+  geom_label(data=changes, aes(x=change, y=0.9, label=str_wrap(text,15)),family="Georgia") +
   scale_x_continuous(breaks=c(1850, 1919, 1940, 2003), 
                      limits = c(1820, 2040),expand = c(0, 0)) +
   scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
@@ -170,7 +175,7 @@ fig.desc <- ggplot() +
                     labels=function(x) str_wrap(x, width=20)) +
   guides(fill = guide_legend(nrow=1)) +
   theme_bw() +
-  theme(legend.position = "none",
+  theme(text=element_text(family="Georgia"), legend.position = "none",
         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
         axis.title.x = element_blank(), axis.title.y = element_blank(),
         axis.line.y = element_blank(),
@@ -180,34 +185,115 @@ fig.desc <- ggplot() +
 fig.desc
 ```
 
+## Drivers & Methods
+
+```{r}
+drivers <- data.frame(
+  start = c(1850,1919, 1940, 1970, 1990),
+  end = c(2022, 2022, 2022, 2022, 2022),
+  upper = c(0.9, 0.8, 0.7, 0.6, 0.5),
+  lower = c(.82, 0.72, 0.62, 0.52, 0.42),
+  driver=as.factor(c("Loss of Indigenous fire through colonization", "Timber management","Fire suppression paradigm","WUI & communities", "Climate change")))
+
+future.drivers <- data.frame(
+  start = 2022,
+  end = 2040,
+  upper = c(0.9, 0.8, 0.7, 0.6, 0.5),
+  lower = c(.82, 0.72, 0.62, 0.52, 0.42),
+  driver=as.factor(c("Loss of Indigenous fire through colonization", "Timber management","Fire suppression paradigm","WUI & communities", "Climate change")))
+
+methods <- data.frame(
+  chapter = c("Chapter 1", "Chapter 2", "Chapters 3 & 4"),
+  change = c("Fire deficit",
+           "Fuel accumulation", 
+           "Fire behaviour & risk"),
+  start = c(1919, 1950, 1950),
+  end = c(2019, 2016, 2038),
+  drivers = c("Historical fire frequency & 20th century fire suppression",
+            "Fire suppression, forest management", 
+           "Fire deficit, fuel accumulation, and values at risk"),
+  method = c("Chapter 1: Fire perimeters",
+           "Chapter 2: Historical air photos", 
+           "Chapters 3 & 4: Simulation modelling"),
+  upper = c(0.32, 0.22, 0.12),
+  lower = c(.24, 0.14, 0.04))
+```
+
+```{r}
+fig.drivers <- ggplot() +
+  #phases
+  geom_rect(data=phases2, 
+              aes(xmin=start, xmax=end, ymin=0, ymax=1,
+                  fill=phase), alpha=0.5) +
+  scale_fill_manual(values = pal, name = "", 
+                    labels=function(x) str_wrap(x, width=20)) +
+  #vline & hline
+  geom_vline(data=changes, aes(xintercept=change), linetype = "dashed")  +
+  #geom_hline(data=changes, aes(yintercept=0.4), size=.3)  +
+  #drivers
+  geom_rect(data=drivers, aes(xmin = start, xmax = end, 
+              ymin = lower, ymax = upper),
+            col = "saddlebrown", fill = "white", size=0.75, alpha=0.6) +
+  geom_fit_text(data=drivers,aes(xmin=start, xmax=end, 
+                                 ymin=lower, ymax=upper,
+                                 label=driver), family="Georgia") +
+  geom_rect(data=future.drivers, aes(xmin = start, xmax = end, 
+              ymin = lower, ymax = upper),
+            col = "gray50", fill = "white", size=0.75, alpha=0.6, linetype="dotted") +
+
+  #methods
+  geom_rect(data=methods, aes(xmin = start, xmax = end, 
+              ymin = lower, ymax = upper, col = chapter),
+            fill = "white", size=0.75, alpha=0.6) +
+  geom_fit_text(data=methods,aes(xmin=start, xmax=end, 
+                                 ymin=lower, ymax=upper,
+                                 label=method),family="Georgia") +
+  scale_color_manual(values=c("firebrick4","darkorange3","darkgoldenrod")) +
+  #text labels
+  #annotate("text", x=1825, y=0.92, label="Drivers", family="Georgia", size=5, hjust=0) + #fontface=2
+  #annotate("text", x=1825, y=0.37, label="Methods", family="Georgia", size=5, hjust=0) +
+  #theme
+  scale_x_continuous(breaks=c(1850, 1919, 1940, 2003), 
+                     limits = c(1820, 2040),expand = c(0, 0)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+
+  guides(fill = guide_legend(nrow=1)) +
+  theme_bw() +
+  theme(
+    legend.position = "none",
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.line.y = element_blank(),
+        axis.text.x = element_blank(),
+        legend.text = element_text(size="11"),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+fig.drivers
+```
+
+
+
+
+
+## Combine
+
 ```{r}
 fig.timeline <- ggarrange(fig.desc,fig.milestones,
           nrow=2, common.legend=TRUE, legend = "top")
 fig.timeline
+
 ggsave("figures/3_timeline.png", fig.timeline, dpi=300, width=10, height=7)
-
 ```
 
-
-# Methods Table
 ```{r}
-methods.table <- data.frame(
-chapter = c("Chapter 1", "Chapter 2", "Chapters 3 & 4"),
-change = c("fire deficit",
-           "fuel accumulation", 
-           "fire exposure & risk"),
-time_period= c("1919-2019",
-               "1950, 2016", 
-               "1950, 2021"),
-drivers = c("historical fire frequency & 20th century fire suppression",
-            "fire suppression, forest management", 
-           "fire deficit, fuel accumulation, and values at risk"),
-method = c("historical fire perimeters",
-           "historical air photos", 
-           "simulation modelling")
+fig.timeline2 <- ggarrange(fig.desc,fig.drivers,fig.milestones,
+          nrow=3, common.legend=TRUE, legend = "top")
+fig.timeline2
 
-)
+ggsave("figures/3_timeline2.png", fig.timeline2, dpi=300, width=10, height=10)
 ```
+
+
+
 
 # Diagram
 
@@ -218,7 +304,7 @@ digraph boxes_and_circles {
   graph [overlap = true, fontsize = 12]
   # several 'node' statements
   node [shape = box,
-        fontname = Helvetica]
+        fontname = Georgia]
 A [label = 'Fire suppression\n paradigm']
 B [label = 'Timber management']
 C [label = 'Mild 20th\n century climate']
@@ -258,9 +344,10 @@ graph1
 
 
 ```{r}
-
 #C [label = 'Mild 20th\n century climate']
 #I [label = 'Technological \nadvancement']
+#J [label = 'Social & ecological\n values']
+#G->J G->4J->4
 
 pathways <- grViz("
 digraph boxes_and_circles {
@@ -269,55 +356,52 @@ digraph boxes_and_circles {
   graph [overlap = true, fontsize = 12]
 
   # several 'node' statements
-  node [shape = box, fontname = Helvetica]
-D [label = 'Loss of Indigenous fire\n through colonization']
-F [label = 'Extreme fire weather']
+  node [shape = box, fontname = Georgia]
+F [label = 'Extreme fire\n weather']
 H [label = 'Increasing\n lightning ignitions']
-J [label = 'Social & ecological\n values']
-K [label = 'Fire season length']
-M [label = 'Fuel type transitions']
-
+K [label = 'Fire season\n length']
+M [label = 'Fuel type\n transitions']
+L [label = 'Human\n ignitions']
 
   node [width=1, height=1, 
-fontsize=14, color=saddlebrown]
+fontsize=14, color=saddlebrown, penwidth=2]
+D [label = 'Loss of Indigenous fire\n through colonization']
 A [label = 'Fire suppression\n paradigm']
 B [label = 'Timber\n management']
 E [label = 'Climate change']
 G [label = 'WUI\n & communities']
 
   node [shape = circle,
-        fixedsize = true,
-        width = 1.7, color=darkorange,penwidth=2] 
-1 [label = 'Fuel\n accumulation']
+        fixedsize = true, width = 1.7, 
+        color=darkorange3,penwidth=2, fontsize=16] 
+  1 [label = 'Fuel\n accumulation']
 
-  node [shape = circle,
-        fixedsize = true,
-        width = 1.7, color=maroon,penwidth=2] 
-2 [label = 'Fire deficit']
+  node [color=firebrick4] 
+  2 [label = 'Fire deficit']
 
-  node [shape = circle,
-        fixedsize = true,
-        width = 1.7, color=gold] 
-3 [label = 'Fire\nbehaviour']
+  node [color=darkgoldenrod] 
+  3 [label = 'Fire\nbehaviour']
 
   node[shape = circle, fixedsize = true,
         width = 1.7, color=black]
-4 [label = 'Contemporary\n fire risk']
+  4 [label = 'Contemporary\n fire risk']
 
   # several 'edge' statements
   A->M A->2 D->2 B->A
-  E->K K->4  D->A E->H
+  E->K K->3  D->A E->H
   1->4 2->4 E->F F->3 2->1
-  G->4 H->3 3->4 1->3 J->4
-  G->M M->1 B->M E->M M->3 
+  H->3 3->4 1->3 
+  G->M M->1 B->M E->M M->3
+  G->L L->3 G->A 
 }
 ")
 pathways 
 
-pathways %>%
-    export_svg() %>%
-    charToRaw %>% 
-    rsvg_png("figures/4_pathways.png")
+
+# pathways %>%
+#     export_svg() %>%
+#     charToRaw %>% 
+#     rsvg_png("figures/4_pathways.png")
 ```
 Through my doctoral research I will identify and quantify the drivers, interactions, and feedbacks that characterize disrupted fire regimes. 
 
@@ -325,23 +409,37 @@ Through my doctoral research I will identify and quantify the drivers, interacti
 legend <- grViz("
 digraph boxes_and_circles {
 
+node [shape = box, width=1, height=.7, 
+fontsize=14, color=saddlebrown]
+A [label = 'Driver']
+
   node [shape = circle,
         fixedsize = true,
-        width = 1, color=maroon,penwidth=2] 
+        width = 1.2, color=black] 
+B [label = 'Consequence']
+
+  node [shape = circle,
+        fixedsize = true,
+        width = 1, color=firebrick4] 
 2 [label = 'Chapter 1']
 
   node [shape = circle,
         fixedsize = true,
-        width = 1, color=darkorange,penwidth=2] 
+        width = 1, color=darkorange3] 
 1 [label = 'Chapter 2']
 
 
   node [shape = circle,
         fixedsize = true,
-        width = 1, color=gold] 
+        width = 1, color=darkgoldenrod] 
 3 [label = 'Chapters\n 3 & 4']
+
+A->B B->2 B->1 B->3
+
+
 }
 ")
+
 
 legend
 ```
