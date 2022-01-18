@@ -17,6 +17,7 @@ library(ggfittext)
 library(ggpubr)
 library(DiagrammeR)
 library(DiagrammeRsvg)
+library(rsvg)
 library(ggprism)
 ```
 
@@ -108,6 +109,8 @@ fig.milestones <- ggplot() +
   geom_text(data=milestones, 
             aes(x=year,y=position+0.02,label=label, fontface="bold"),size=4,
             color='black',family="Georgia") + 
+  annotate("text", x=2022, y=0.22, label="2018", fontface="bold",size=4, #add 2018 label manually
+            color='black',family="Georgia") +
   geom_label_repel(data = milestones,
                   aes(x=year,y=text_position,label=str_wrap(milestone,16)),
                   size=3,
@@ -121,7 +124,7 @@ fig.milestones <- ggplot() +
   scale_y_continuous(limits=c(0,0.4)) +
   labs(fill = "Phase") +
   #theme customization
-  theme_classic() +
+  theme_bw() +
   theme(text = element_text(family = "Georgia"),
         legend.position = "bottom",
         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
@@ -129,11 +132,13 @@ fig.milestones <- ggplot() +
         axis.line.y = element_blank(), 
         axis.text.x = element_text(face="bold", size="16"),
         legend.text = element_text(size="11"),
-        prism.ticks.length.x = unit(3, "pt"),
+        prism.ticks.length.x = unit(4, "pt"),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         axis.line.x = element_line(size=0.5, 
                                    arrow = grid::arrow(length = unit(0.4, "cm"),
                                                        ends = "last")))
 fig.milestones
+
 ```
 
 ## Descriptive phases
@@ -193,14 +198,14 @@ drivers <- data.frame(
   end = c(2022, 2022, 2022, 2022, 2022),
   upper = c(0.9, 0.8, 0.7, 0.6, 0.5),
   lower = c(.82, 0.72, 0.62, 0.52, 0.42),
-  driver=as.factor(c("Loss of Indigenous fire through colonization", "Timber management","Fire suppression paradigm","WUI & communities", "Climate change")))
+  driver=as.factor(c("Elimination of Indigenous fire through colonization", "Timber management","Fire suppression paradigm","WUI & communities", "Climate change")))
 
 future.drivers <- data.frame(
   start = 2022,
   end = 2040,
   upper = c(0.9, 0.8, 0.7, 0.6, 0.5),
   lower = c(.82, 0.72, 0.62, 0.52, 0.42),
-  driver=as.factor(c("Loss of Indigenous fire through colonization", "Timber management","Fire suppression paradigm","WUI & communities", "Climate change")))
+  driver=as.factor(c("Elimination of Indigenous fire through colonization", "Timber management","Fire suppression paradigm","WUI & communities", "Climate change")))
 
 methods <- data.frame(
   chapter = c("Chapter 1", "Chapter 2", "Chapters 3 & 4"),
@@ -239,8 +244,8 @@ fig.drivers <- ggplot() +
                                  label=driver), family="Georgia") +
   geom_rect(data=future.drivers, aes(xmin = start, xmax = end, 
               ymin = lower, ymax = upper),
-            col = "gray50", fill = "white", size=0.75, alpha=0.6, linetype="dotted") +
-
+            col = "gray50", fill = "white", size=0.75, alpha=0.6, 
+            linetype="dotted") +
   #methods
   geom_rect(data=methods, aes(xmin = start, xmax = end, 
               ymin = lower, ymax = upper, col = chapter),
@@ -248,7 +253,7 @@ fig.drivers <- ggplot() +
   geom_fit_text(data=methods,aes(xmin=start, xmax=end, 
                                  ymin=lower, ymax=upper,
                                  label=method),family="Georgia") +
-  scale_color_manual(values=c("firebrick4","darkorange3","darkgoldenrod")) +
+  scale_color_manual(values=c("firebrick4","darkorange3","darkgoldenrod"), guide="none") +
   #text labels
   #annotate("text", x=1825, y=0.92, label="Drivers", family="Georgia", size=5, hjust=0) + #fontface=2
   #annotate("text", x=1825, y=0.37, label="Methods", family="Georgia", size=5, hjust=0) +
@@ -256,11 +261,9 @@ fig.drivers <- ggplot() +
   scale_x_continuous(breaks=c(1850, 1919, 1940, 2003), 
                      limits = c(1820, 2040),expand = c(0, 0)) +
   scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
-
   guides(fill = guide_legend(nrow=1)) +
   theme_bw() +
-  theme(
-    legend.position = "none",
+  theme(legend.position = "none",
         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
         axis.title.x = element_blank(), axis.title.y = element_blank(),
         axis.line.y = element_blank(),
@@ -268,6 +271,7 @@ fig.drivers <- ggplot() +
         legend.text = element_text(size="11"),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 fig.drivers
+        
 ```
 
 
@@ -285,11 +289,18 @@ ggsave("figures/3_timeline.png", fig.timeline, dpi=300, width=10, height=7)
 ```
 
 ```{r}
-fig.timeline2 <- ggarrange(fig.desc,fig.drivers,fig.milestones,
+fig.timeline2a <- ggarrange(fig.desc,fig.drivers,fig.milestones,
           nrow=3, common.legend=TRUE, legend = "top")
-fig.timeline2
+fig.timeline2a
 
-ggsave("figures/3_timeline2.png", fig.timeline2, dpi=300, width=10, height=10)
+ggsave("figures/3_timeline2a.png", fig.timeline2a, dpi=300, width=10, height=10)
+```
+```{r}
+fig.timeline2b <- ggarrange(fig.drivers, fig.desc, fig.milestones,
+          nrow=3, common.legend=TRUE, legend = "top")
+fig.timeline2b
+
+ggsave("figures/3_timeline2b.png", fig.timeline2b, dpi=300, width=10, height=10)
 ```
 
 
@@ -345,7 +356,7 @@ graph1
 
 ```{r}
 #C [label = 'Mild 20th\n century climate']
-#I [label = 'Technological \nadvancement']
+#I [label = 'Technological\n advancement']
 #J [label = 'Social & ecological\n values']
 #G->J G->4J->4
 
@@ -356,7 +367,7 @@ digraph boxes_and_circles {
   graph [overlap = true, fontsize = 12]
 
   # several 'node' statements
-  node [shape = box, fontname = Georgia]
+  node [shape = box, fontname = Georgia, margin=0.2]
 F [label = 'Extreme fire\n weather']
 H [label = 'Increasing\n lightning ignitions']
 K [label = 'Fire season\n length']
@@ -396,14 +407,15 @@ G [label = 'WUI\n & communities']
 }
 ")
 pathways 
-
-
-# pathways %>%
-#     export_svg() %>%
-#     charToRaw %>% 
-#     rsvg_png("figures/4_pathways.png")
 ```
-Through my doctoral research I will identify and quantify the drivers, interactions, and feedbacks that characterize disrupted fire regimes. 
+
+```{r}
+pathways %>%
+    export_svg() %>%
+    charToRaw %>%
+    rsvg_png("figures/4_pathways.png")
+```
+
 
 ```{r}
 legend <- grViz("
@@ -436,10 +448,8 @@ B [label = 'Consequence']
 
 A->B B->2 B->1 B->3
 
-
 }
 ")
-
 
 legend
 ```
