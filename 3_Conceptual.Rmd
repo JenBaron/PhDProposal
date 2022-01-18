@@ -5,6 +5,8 @@ date: "Jan 12 2022"
 output: html_document
 ---
 
+#Load Packages
+
 ```{r}
 library(ggplot2)
 library(scales)
@@ -19,6 +21,12 @@ library(DiagrammeR)
 library(DiagrammeRsvg)
 library(rsvg)
 library(ggprism)
+library(extrafont)
+#loadfonts(); windowsFonts()
+```
+
+```{r}
+
 ```
 
 https://pharmacoecon.me/post/2021-04-18-timeline-graph/
@@ -131,7 +139,7 @@ fig.milestones <- ggplot() +
         axis.title.x = element_blank(), axis.title.y = element_blank(),
         axis.line.y = element_blank(), 
         axis.text.x = element_text(face="bold", size="16"),
-        legend.text = element_text(size="11"),
+        legend.text = element_text(size="11", family="Georgia"),
         prism.ticks.length.x = unit(4, "pt"),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         axis.line.x = element_line(size=0.5, 
@@ -268,7 +276,7 @@ fig.drivers <- ggplot() +
         axis.title.x = element_blank(), axis.title.y = element_blank(),
         axis.line.y = element_blank(),
         axis.text.x = element_blank(),
-        legend.text = element_text(size="11"),
+        legend.text = element_text(size="11", family="Georgia"),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 fig.drivers
         
@@ -308,49 +316,7 @@ ggsave("figures/3_timeline2b.png", fig.timeline2b, dpi=300, width=10, height=10)
 
 # Diagram
 
-```{r}
-graph1 <- grViz("
-digraph boxes_and_circles {
-  # a 'graph' statement
-  graph [overlap = true, fontsize = 12]
-  # several 'node' statements
-  node [shape = box,
-        fontname = Georgia]
-A [label = 'Fire suppression\n paradigm']
-B [label = 'Timber management']
-C [label = 'Mild 20th\n century climate']
-D [label = 'Loss of Indigenous fire\n through colonization']
-E [label = 'Climate change']
-F [label = 'Extreme fire weather']
-G [label = 'Wildland-urban interface\n & communities']
-H [label = 'Increasing\n lightning ignitions']
-I [label = 'Post-WWII technologies']
-J [label = 'Social & ecological values']
-K [label = 'Fire season length']
-L [label = 'Complex topography']
-  node [shape = circle,
-        fixedsize = true,
-        width = 1.7, color=darkorange,penwidth=2] 
-1 [label = 'Fuel accumulation']
-  node [shape = circle,
-        fixedsize = true,
-        width = 1.7, color=maroon,penwidth=2] 
-2 [label = 'Fire deficit']
-  node [shape = circle,
-        fixedsize = true,
-        width = 1.7, color=gold] 
-3 [label = 'Fire behaviour']
-  node[shape = triangle, width=2.5, height=2.5, color=black]
-4 [label = 'Contemporary\n fire risk']
-  # several 'edge' statements
-  A->1 A->2 C->A B->1 D->2 B->A
-  E->K K->4 L->3  D->A E->H
-  1->4 2->4 E->F F->3 G->2 2->1
-  G->4 H->3 I->A 3->4 1->3 J->4
-}
-")
-graph1
-```
+
 
 
 
@@ -376,7 +342,7 @@ L [label = 'Human\n ignitions']
 
   node [width=1, height=1, 
 fontsize=14, color=saddlebrown, penwidth=2]
-D [label = 'Loss of Indigenous fire\n through colonization']
+D [label = 'Elimination of \nIndigenous fire\n through colonization']
 A [label = 'Fire suppression\n paradigm']
 B [label = 'Timber\n management']
 E [label = 'Climate change']
@@ -416,6 +382,51 @@ pathways %>%
     rsvg_png("figures/4_pathways.png")
 ```
 
+## Archive
+
+```{r}
+graph1 <- grViz("
+digraph boxes_and_circles {
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 12]
+  # several 'node' statements
+  node [shape = box,
+        fontname = Georgia]
+A [label = 'Fire suppression\n paradigm']
+B [label = 'Timber management']
+C [label = 'Mild 20th\n century climate']
+D [label = 'Elimination of Indigenous fire\n through colonization']
+E [label = 'Climate change']
+F [label = 'Extreme fire weather']
+G [label = 'Wildland-urban interface\n & communities']
+H [label = 'Increasing\n lightning ignitions']
+I [label = 'Post-WWII technologies']
+J [label = 'Social & ecological values']
+K [label = 'Fire season length']
+L [label = 'Complex topography']
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=darkorange,penwidth=2] 
+1 [label = 'Fuel accumulation']
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=maroon,penwidth=2] 
+2 [label = 'Fire deficit']
+  node [shape = circle,
+        fixedsize = true,
+        width = 1.7, color=gold] 
+3 [label = 'Fire behaviour']
+  node[shape = triangle, width=2.5, height=2.5, color=black]
+4 [label = 'Contemporary\n fire risk']
+  # several 'edge' statements
+  A->1 A->2 C->A B->1 D->2 B->A
+  E->K K->4 L->3  D->A E->H
+  1->4 2->4 E->F F->3 G->2 2->1
+  G->4 H->3 I->A 3->4 1->3 J->4
+}
+")
+graph1
+```
 
 ```{r}
 legend <- grViz("
