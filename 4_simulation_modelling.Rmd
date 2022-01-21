@@ -1,0 +1,104 @@
+---
+title: "Chapter 4"
+author: "Jen Baron"
+date: "1/20/2022"
+output: html_document
+---
+
+#Load Packages
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(DiagrammeR)
+library(DiagrammeRsvg)
+library(rsvg)
+library(ggprism)
+library(extrafont)
+#loadfonts(); windowsFonts()
+```
+#
+
+D [label = 'Fire Suppression']
+
+
+f [label = 'Flame length probability']
+g [label = 'Fire line intensity']
+
+
+
+
+```{r}
+grViz("
+digraph boxes_and_circles {
+  # a 'graph' statement
+  graph [overlap = true, fontsize = 12 compound=true] #compound=true to add arrows from clusters
+
+  # several 'node' statements
+
+node [shape = plaintext,
+        fontname = Georgia]
+A [label = 'Baseline conditions assessment']
+B [label = 'Alternate state assessment']
+
+
+node [shape = circle, fixedsize = true,
+        width = 1.7]
+a1 [label = 'Fuels & topography']
+a2 [label = 'Ignitions']
+a3 [label = 'Weather']
+
+b1 [label = 'Alternate\n fuels & topography']
+b2 [label = 'Alternate\n Ignitions']
+b3 [label = 'Alternate\n Weather']
+
+node [shape = circle, fixedsize = true, width = 2]
+C [label = 'Wildfire\n simulation\n modelling']
+
+
+node [shape = circle, fixedsize = true, width = 1.7]
+c1 [label = 'Fire perimeters']
+c2 [label = 'Ignitions']
+c3 [label = 'Burn probability']
+c4 [label = 'Fire intensity']
+
+# subgraphs
+
+subgraph cluster_0 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=white];
+		a1 a2 a3;}
+
+subgraph cluster_1 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=white];
+		b1 b2 b3;}
+
+subgraph cluster_3 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=white];
+		c1 c2 c3 c4;}
+
+# several 'edge' statements
+
+A->a2 B->b2
+a1->C [ltail=cluster_0]
+b3->C [ltail=cluster_1]
+C-> c1 [lhead=cluster_2]
+
+
+}
+")
+```
+
+
+# Reproducibility
+
+```{r}
+git2r::repository()
+Sys.time()
+sessionInfo()
+```
