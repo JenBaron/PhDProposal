@@ -363,7 +363,7 @@ G [label = 'WUI\n & communities']
 
   node[shape = circle, fixedsize = true,
         width = 2, color=black]
-  4 [label = 'Contemporary\n fire risk']
+  4 [label = 'Synthesis:\n Contemporary\n fire risk']
 
   # several 'edge' statements
   A->M A->2 D->2 
