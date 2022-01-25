@@ -39,20 +39,20 @@ b3d [label = '2050 RCP8.5']
 ## Simple
 
 ```{r}
-grViz("
+simple <- grViz("
 digraph boxes_and_circles {
   # a 'graph' statement
   graph [overlap = true, fontsize = 12 compound=true] #compound=true to add arrows from clusters
 
   # several 'node' statements
 node [shape = circle, fixedsize = true, width = 1.7]
-a1 [label = 'Modern fuels']
-a2 [label = 'Modern ignitions']
-a3 [label = 'Modern weather']
+a1 [label = 'Modern\n fuels']
+a2 [label = 'Modern\n ignitions']
+a3 [label = 'Modern\n weather']
 
-b1 [label = 'Historical fuels']
-b2 [label = 'Historical ignitions']
-b3 [label = 'Historical weather']
+b1 [label = 'Historical\n fuels']
+b2 [label = 'Historical\n ignitions']
+b3 [label = 'Historical\n weather']
 
 node [shape = circle, fixedsize = true, width = 2]
 C [label = 'Wildfire\n simulation\n modelling']
@@ -94,7 +94,16 @@ d2->C [ltail=cluster_d]
 
 }
 ")
+simple
 ```
+
+```{r}
+simple %>%
+    export_svg() %>%
+    charToRaw %>%
+    rsvg_png("figures/5_simulation_simple.png")
+```
+
 ## Restoration to historical fuels
 
 ```{r}
