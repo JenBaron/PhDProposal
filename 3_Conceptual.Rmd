@@ -26,7 +26,7 @@ library(extrafont)
 ```
 
 ```{r}
-
+fire <- read.csv("data/fire_annual_update_2021.csv")
 ```
 
 https://pharmacoecon.me/post/2021-04-18-timeline-graph/
@@ -148,6 +148,41 @@ fig.milestones <- ggplot() +
 fig.milestones
 
 ```
+## Area burned
+
+```{r}
+ggplot() +
+  #colored rectangles (phases)
+  geom_rect(data=phases2, 
+              aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf,
+                  fill=phase), alpha=0.5) +
+  #dashed breakpoints
+  geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
+  #custom colours
+  scale_fill_manual(values = pal, name = "", 
+                    labels=function(x) str_wrap(x, width=15)) +
+  scale_x_continuous(breaks=c(1850, 1919, 1940, 2003, 2022), 
+                     limits = c(1820, 2040),expand = c(0, 0),
+                     guide = "prism_minor", minor_breaks = seq(1820, 2030, 10)) + #minor breaks
+  scale_y_continuous(limits=c(0,0.4)) +
+  labs(fill = "Phase") +
+  #theme customization
+  theme_bw() +
+  theme(text = element_text(family = "Georgia"),
+        legend.position = "bottom",
+        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.title.x = element_blank(), axis.title.y = element_blank(),
+        axis.line.y = element_blank(), 
+        axis.text.x = element_text(face="bold", size="16"),
+        legend.text = element_text(size="11", family="Georgia"),
+        prism.ticks.length.x = unit(4, "pt"),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.line.x = element_line(size=0.5, 
+                                   arrow = grid::arrow(length = unit(0.4, "cm"),
+                                                       ends = "last")))
+
+```
+
 
 ## Descriptive phases
 ```{r}
