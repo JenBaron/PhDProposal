@@ -151,28 +151,49 @@ fig.milestones
 ## Area burned
 
 ```{r}
-ggplot() +
+milestones2 <- data.frame(
+  year = c(1931, 2003, 2017, 2018),
+  label = c(1931,  2003, 2017, NA),
+  milestone = c(
+                "Largest area burned on record",
+                "'Firestorm' threatens communities",
+                "Back-to-back record-breaking fire seasons",
+                "")) %>%
+  mutate(
+    # Specify y-direction for milestone
+    position = c(210, 70, 105, 0), 
+    # Specify text position
+    text_position = 20 + position)
+
+```
+
+```{r}
+fig.area <- ggplot() +
   #colored rectangles (phases)
   geom_rect(data=phases2, 
               aes(xmin=start, xmax=end, ymin=-Inf, ymax=Inf,
                   fill=phase), alpha=0.5) +
   #dashed breakpoints
   geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
+  #area burned
+  geom_col(data=fire, aes(x=fire_year, y=area_burned/1000), width=0.6, position="dodge") +
+  geom_label_repel(data = milestones2,
+                  aes(x=year,y=text_position,label=str_wrap(milestone,16)),
+                  size=3,
+                  point.size=NA, family="Georgia")  +
   #custom colours
   scale_fill_manual(values = pal, name = "", 
                     labels=function(x) str_wrap(x, width=15)) +
   scale_x_continuous(breaks=c(1850, 1919, 1940, 2003, 2022), 
                      limits = c(1820, 2040),expand = c(0, 0),
                      guide = "prism_minor", minor_breaks = seq(1820, 2030, 10)) + #minor breaks
-  scale_y_continuous(limits=c(0,0.4)) +
-  labs(fill = "Phase") +
+  scale_y_continuous(expand = c(0,0), limits=c(0,250)) +
+  labs(fill = "Phase", y = (expression(paste("Area Burned (ha x ", 10^3, ")")))) +
   #theme customization
   theme_bw() +
   theme(text = element_text(family = "Georgia"),
         legend.position = "bottom",
-        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
-        axis.title.x = element_blank(), axis.title.y = element_blank(),
-        axis.line.y = element_blank(), 
+        axis.title.x = element_blank(), 
         axis.text.x = element_text(face="bold", size="16"),
         legend.text = element_text(size="11", family="Georgia"),
         prism.ticks.length.x = unit(4, "pt"),
@@ -180,6 +201,7 @@ ggplot() +
         axis.line.x = element_line(size=0.5, 
                                    arrow = grid::arrow(length = unit(0.4, "cm"),
                                                        ends = "last")))
+fig.area
 
 ```
 
@@ -346,6 +368,13 @@ fig.timeline2b
 ggsave("figures/3_timeline2b.png", fig.timeline2b, dpi=300, width=10, height=10)
 ```
 
+```{r}
+fig.timeline3 <- ggarrange(fig.drivers, fig.desc, fig.area,
+          nrow=3, common.legend=TRUE, legend = "top", align="v")
+fig.timeline3
+
+ggsave("figures/3_timeline3.png", fig.timeline3, dpi=300, width=10, height=10)
+```
 
 
 
