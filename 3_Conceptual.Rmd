@@ -176,7 +176,8 @@ fig.area <- ggplot() +
   #dashed breakpoints
   geom_vline(data=changes, aes(xintercept=change), linetype = "dashed") +
   #area burned
-  geom_col(data=fire, aes(x=fire_year, y=area_burned/1000), width=0.6, position="dodge") +
+  geom_col(data=fire, aes(x=fire_year, y=area_burned/1000), 
+           width=0.6, position="dodge", fill = "gray26") +
   geom_label_repel(data = milestones2,
                   aes(x=year,y=text_position,label=str_wrap(milestone,16)),
                   size=3,
